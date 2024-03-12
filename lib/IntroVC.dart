@@ -13,33 +13,34 @@ class IntroVC extends StatefulWidget {
 class _IntroVCState extends State<IntroVC> {
   PageController? pageCountroller;
   int currentPage = 0;
-  YoutubePlayerController? controller;
+  List<YoutubePlayerController>? _controllers;
   List arrVideos = [
     "hHCqzpr9t9w",
     "hwMGDTDoNPA",
     "hwMGDTDoNPA"
   ];
 
-  initializePlayer(int index) {
-    controller = YoutubePlayerController(
-      initialVideoId: arrVideos[index],
-      params: const YoutubePlayerParams(
-        autoPlay: false,
-        startAt: Duration(minutes: 0, seconds: 0),
-        showControls: true,
-        showFullscreenButton: true,
-        desktopMode: false,
-        privacyEnhanced: true,
-        useHybridComposition: true,
-      ),
-    );
-    controller?.onEnterFullscreen = () {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    };
-    controller?.onExitFullscreen = () {};
+  initializePlayer() {
+    _controllers = List<YoutubePlayerController>.generate(arrVideos.length, (index) => YoutubePlayerController(initialVideoId: arrVideos[index]));
+  //  controller = YoutubePlayerController(
+  //     initialVideoId: arrVideos[index],
+  //     params: const YoutubePlayerParams(
+  //       autoPlay: false,
+  //       startAt: Duration(minutes: 0, seconds: 0),
+  //       showControls: true,
+  //       showFullscreenButton: true,
+  //       desktopMode: false,
+  //       privacyEnhanced: true,
+  //       useHybridComposition: true,
+  //     ),
+  //   );
+  //   _controllers?.onEnterFullscreen = () {
+  //     SystemChrome.setPreferredOrientations([
+  //       DeviceOrientation.landscapeLeft,
+  //       DeviceOrientation.landscapeRight,
+  //     ]);
+  //   };
+  //   _controllers?.onExitFullscreen = () {};
   }
 
   @override
@@ -47,7 +48,7 @@ class _IntroVCState extends State<IntroVC> {
     // TODO: implement initState
     super.initState();
     pageCountroller = PageController(initialPage: currentPage);
-    initializePlayer(0);
+    initializePlayer();
   }
 
   @override
@@ -70,7 +71,7 @@ class _IntroVCState extends State<IntroVC> {
                   onPageChanged: (index) {
                     setState(() {
                       currentPage = index;
-                      initializePlayer(index);
+                      // initializePlayer(index);
                     });
                   },
                   controller: pageCountroller,
@@ -82,14 +83,14 @@ class _IntroVCState extends State<IntroVC> {
                       child: Container(
                         color: Colors.black,
                         child: YoutubePlayerControllerProvider(
-                          controller: controller!,
+                          controller: _controllers![index],
                           child: Center(
                             child: Stack(
                               children: [
                                 player,
                                 Positioned.fill(
                                   child: YoutubeValueBuilder(
-                                    controller: controller,
+                                    controller: _controllers![index],
                                     builder: (context, value) {
                                       return AnimatedCrossFade(
                                         firstChild: const SizedBox.shrink(),
@@ -100,8 +101,7 @@ class _IntroVCState extends State<IntroVC> {
                                                   image: NetworkImage(
                                                     YoutubePlayerController
                                                         .getThumbnail(
-                                                      videoId: controller!
-                                                          .initialVideoId,
+                                                      videoId: _controllers![index].initialVideoId,
                                                       quality:
                                                           ThumbnailQuality.medium,
                                                     ),
